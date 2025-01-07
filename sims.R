@@ -58,16 +58,16 @@ for (i in 1:length(vector)){
 }
 names(contactdata) <- c('personnumber','initcohorttime', 'secondinfecttime','genint') # insert names in contactdata
 
-print(contactdata)
-print(contactdata$genint)
 
 # Generate plots
 
 #Forward-Scheme figure (only really useful for scenario 1)
 #ggplot(contactdata, aes(initcohorttime, genint)) + geom_point() + labs(x = 'Time of Initial Cohort Infection', y = 'Generation Interval', title = 'Forward Model Schematic')
 
+par(mfrow=c(1,2))
+
 #Histogram Plot
-#ggplot(contactdata, aes(x = genint)) + geom_histogram(bins = 100) + labs(x = 'Generation Interval Length', y = 'Number of Secondary Infections', title = 'Forward Model Histogram')
+ggplot(contactdata, aes(x = genint)) + geom_histogram(bins = 100) + labs(x = 'Generation Interval Length', y = 'Number of Secondary Infections', title = 'Forward Model Histogram')
 
 #Density Plot
 ggplot(contactdata, aes(x = genint)) + geom_density() + labs(x = 'Generation Interval Length', y = 'Frequency of Secondary Infections', title = 'Forward Model Density Distribution')

@@ -17,4 +17,3 @@ multiforwardsims <- function(iterations, vectortype, N, beta, gamma){
   }
 }
 #print(multisim)
-print(output)
