@@ -5,6 +5,7 @@
 
 # Loading packages
 library(ggplot2)
+library(tidyverse)
 
 multisim <- data.frame(genint = numeric(),
                        group = character())
@@ -76,11 +77,16 @@ plotsim <- function(iterations,vectortype,cohortsize,transmissionrate,recoveryra
   #Forward-Scheme figure (only really useful for scenario 1)
   #ggplot(contactdata, aes(initcohorttime, genint)) + geom_point() + labs(x = 'Time of Initial Cohort Infection', y = 'Generation Interval', title = 'Forward Model Schematic')
   
-  #Histogram Plot
-  #ggplot(multisim, aes(x = generation, fill = simnumb)) + geom_bar() + labs(x = 'Generation Interval Length', y = 'Number of Secondary Infections', title = 'Forward Model Histogram')
+  #Histogram Plot -> ISSUE: stat_bin() continuous variable error...
+  #ggplot(multisim, aes(x=generation, fill = as.factor(simnumb)))+ geom_histogram(stat = "identity", binwidth = 0.1, color='#e9ecef', alpha=0.6, position='identity') + labs(x = 'Generation Interval Length', y = 'Number of Secondary Infections', title = 'Forward Model Histogram')
+  ggplot(multisim, aes(x = generation, group=simnumb, fill = simnumb)) + geom_histogram(position="identity", alpha=0.5, binwidth=0.25, stat="count") + theme_bw()
+  
+  # help: https://r-charts.com/distribution/histogram-group-ggplot2/
+  # multi option: https://r-graph-gallery.com/histogram_several_group.html
+  # marginal hist: https://r-graph-gallery.com/277-marginal-histogram-for-ggplot2.html
   
   #Density Plot
-  ggplot(multisim, aes(x = generation, group = simnumb, color = simnumb)) + geom_density() + labs(x = 'Generation Interval Length', y = 'Frequency of Secondary Infections', title = 'Forward Model Density')
+  #ggplot(multisim, aes(x = generation, group = simnumb, color = simnumb)) + geom_density() + labs(x = 'Generation Interval Length', y = 'Frequency of Secondary Infections', title = 'Forward Model Density')
   
 }
 
