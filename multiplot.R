@@ -4,16 +4,17 @@ library(dplyr)
 #create dataframe
 multisim <- data.frame(genint = numeric(),
                        group = character())
+output=c()
 
 multiforwardsims <- function(iterations, vectortype, N, beta, gamma){
   
   for (i in 1:iterations){ 
       newsim = forwardsim(0,N,beta,gamma) # run a simulation from stochastic regime
-      datapoints = newsim$genint
-      print(datapoints)
-      output = c(datapoints, rep(paste0("sim_", i), times = length(datapoints)))
-      multisim <- rbind(multisim,output)
-      print(multisim)
+      output <- cbind(newsim$genint,paste0("sim_", i))
+      print(output)
+      #multisim <- rbind(multisim,output)
+      #print(multisim)
   }
 }
-print(multisim)
+#print(multisim)
+print(output)

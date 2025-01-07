@@ -59,6 +59,7 @@ for (i in 1:length(vector)){
 names(contactdata) <- c('personnumber','initcohorttime', 'secondinfecttime','genint') # insert names in contactdata
 
 print(contactdata)
+print(contactdata$genint)
 
 # Generate plots
 
