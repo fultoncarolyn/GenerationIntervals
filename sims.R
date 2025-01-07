@@ -32,7 +32,7 @@ for (i in 1:length(vector)){
   # If no contacts produced...
   if (contacts == 0){
     # Include individual in data frame but denote no contacts
-    print(paste0("There were not contacts produced by individual:", i," from initial cohort."))
+    print(paste0("There were no contacts produced by individual:", i," from initial cohort."))
     output = c(i,vector[i],NA,NA)
     contactdata <- rbind(contactdata, output)
     next
@@ -43,8 +43,8 @@ for (i in 1:length(vector)){
       transmission <- rbinom(1,1,transmissionrate)
       if (transmission == 0){
         # If the contact does not produce an infection...
-        print(paste0("Contact:", j,"for individual:", i,"did not yield an infection. Transmission prob =", transmission,"."))
-        ##include something here? new column for total possible or failed contacts?##
+        print(paste0("Contact:", j,"for individual:", i,"did NOT yield an infection. Transmission prob =", transmission,"."))
+        ## Does not add to dataframe to avoid clutter - would we need to track contacts that do not become infections?
         next
       } else{
         # If the contact does produce an infection...
@@ -62,14 +62,14 @@ print(contactdata)
 
 # Generate plots
 
-#Forward-Scheme figure
+#Forward-Scheme figure (only really useful for scenario 1)
 #ggplot(contactdata, aes(initcohorttime, genint)) + geom_point() + labs(x = 'Time of Initial Cohort Infection', y = 'Generation Interval', title = 'Forward Model Schematic')
 
-#Density/Distribution
-ggplot(contactdata, aes(x = genint)) + geom_histogram(bins = 25) + labs(x = 'Generation Interval', y = 'Number of Secondary', title = 'Forward Model Histogram')
+#Histogram Plot
+#ggplot(contactdata, aes(x = genint)) + geom_histogram(bins = 100) + labs(x = 'Generation Interval Length', y = 'Number of Secondary Infections', title = 'Forward Model Histogram')
 
-#Violin
-#ggplot(contactdata, aes(initcohorttime, genint,))
+#Density Plot
+ggplot(contactdata, aes(x = genint)) + geom_density() + labs(x = 'Generation Interval Length', y = 'Frequency of Secondary Infections', title = 'Forward Model Density Distribution')
 
 }
 
