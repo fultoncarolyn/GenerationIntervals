@@ -97,8 +97,8 @@ plotsim <- function(iterations,vectortype,cohortsize,transmissionrate,recoveryra
       panel.spacing = unit(0.1, "lines"),
       strip.text.x = element_text(size = 8)
     ) +
-    xlab("") +
-    ylab("Assigned Probability (%)") +
+    xlab("Generation Interval") +
+    ylab("Number of Secondary Infections") +
     facet_wrap(~simnumb)
   
   print(p)
