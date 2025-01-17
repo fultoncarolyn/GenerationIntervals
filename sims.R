@@ -57,7 +57,7 @@ for (i in 1:length(vector)){
   }
 }
 names(contactdata) <- c('personnumber','initcohorttime', 'secondinfecttime','genint') # insert names in contactdata
-
+print(contactdata)
 
 # Generate plots
 
@@ -66,11 +66,19 @@ names(contactdata) <- c('personnumber','initcohorttime', 'secondinfecttime','gen
 
 par(mfrow=c(1,2))
 
+print(contactdata)
+
 #Histogram Plot
-ggplot(contactdata, aes(x = genint)) + geom_histogram(bins = 100) + labs(x = 'Generation Interval Length', y = 'Number of Secondary Infections', title = 'Forward Model Histogram')
+plot <- contactdata %>%
+  ggplot( aes(x = genint)) + 
+  geom_histogram(bins = 100) + 
+  geom_density(color="blue") +
+  geom_density(adjust = 0.5, color="green", linetype="dotted")
+  labs(x = 'Generation Interval Length', y = 'Number of Secondary Infections', title = 'Forward Model Histogram')
+print(plot)
 
 #Density Plot
-ggplot(contactdata, aes(x = genint)) + geom_density() + labs(x = 'Generation Interval Length', y = 'Frequency of Secondary Infections', title = 'Forward Model Density Distribution')
+#ggplot(contactdata, aes(x = genint)) + geom_density() + labs(x = 'Generation Interval Length', y = 'Frequency of Secondary Infections', title = 'Forward Model Density Distribution')
 
 }
 

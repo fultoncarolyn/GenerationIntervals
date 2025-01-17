@@ -73,21 +73,18 @@ plotsim <- function(iterations,vectortype,cohortsize,transmissionrate,recoveryra
   }
   names(multisim) <- c('generation', 'simnumb') # insert names in multisim
   multisim <- multisim[!is.na(multisim$generation),]
+
   multisim <- multisim %>%
     gather(key="simnumb", value="generation") %>%
     mutate(simnumb = as.character(simnumb)) %>%
     mutate(generation = as.numeric(generation))
-  print(multisim)
+  #print(multisim)
   
-  #print(class(multisim$generation))
-  #print(typeof(multisim$generation))
-  #print(class(multisim$simnumb))
-  #print(typeof(multisim$simnumb))
   
-  p <- multisim %>%
+  p1 <- multisim %>%
     mutate(simnumb = fct_reorder(simnumb, generation)) %>%
     ggplot( aes(x=generation, color=simnumb)) +
-    geom_histogram(alpha=0.6, binwidth = 0.15) +
+    geom_histogram(alpha=0.1, binwidth = 0.25) +
     geom_density() +
     scale_fill_viridis(discrete=TRUE) +
     scale_color_viridis(discrete=TRUE) +
@@ -101,7 +98,14 @@ plotsim <- function(iterations,vectortype,cohortsize,transmissionrate,recoveryra
     ylab("Number of Secondary Infections") +
     facet_wrap(~simnumb)
   
-  print(p)
+  p2 <- multisim %>%
+    ggplot( aes(x=generation, group=simnumb, fill=simnumb)) +
+    geom_density(adjust = 0.1, alpha=0.2) + 
+    theme_ipsum() +
+    xlab("Generation Interval") +
+    ylab("Frequency of Secondary Infections")
+  
+  print(p2)
 }
 
 
