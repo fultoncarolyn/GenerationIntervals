@@ -71,7 +71,7 @@ print(contactdata)
 #Histogram Plot
 plot <- contactdata %>%
   ggplot( aes(x = genint)) + 
-  geom_histogram(bins = 100) + 
+  geom_histogram(aes(y=..density..), bins = 100) + 
   geom_density(color="blue") +
   geom_density(adjust = 0.5, color="green", linetype="dotted")
   labs(x = 'Generation Interval Length', y = 'Number of Secondary Infections', title = 'Forward Model Histogram')
