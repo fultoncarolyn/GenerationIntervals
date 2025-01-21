@@ -1,18 +1,18 @@
-# Simulation of Forward Generation Interval Measurement
+# Plotting for Multiple Forward Generation Interval Simulations
 
-# GOAL: Create df with original timing of infection, timing of secondary infection, 
-#       and the different between for one generation/layer
+# GOAL: Create epidemiologically motivated figures to explore 
+#       forward generation interval simulations
 
 # Loading packages
 library(ggplot2)
 library(tidyverse)
+library(dplyr)
 library(hrbrthemes)
-library(viridis)
-library(forcats)
 
 multisim <- data.frame(generation = numeric(),
-                       simnumb = character())
-
+                       simnumb = character()
+                       )
+# Note: simulation isolated in sims.R
 plotsim <- function(iterations,vectortype,cohortsize,transmissionrate,recoveryrate){
   for (k in 1:iterations){
   
@@ -66,46 +66,45 @@ plotsim <- function(iterations,vectortype,cohortsize,transmissionrate,recoveryra
     }
     
   }
+  # Data Wrangling Stuff...
   names(contactdata) <- c('personnumber','initcohorttime', 'secondinfecttime','genint') # insert names in contactdata
-  
-  namedintervals = cbind(contactdata$genint,paste0("sim_", k))
+  namedintervals = cbind(contactdata$genint,paste0("sim_", k)) # append simulation group
   multisim <- rbind(multisim,namedintervals)
   }
   names(multisim) <- c('generation', 'simnumb') # insert names in multisim
-  multisim <- multisim[!is.na(multisim$generation),]
-
+  multisim <- multisim[!is.na(multisim$generation),] #remove NA from no contact or other
   multisim <- multisim %>%
     gather(key="simnumb", value="generation") %>%
     mutate(simnumb = as.character(simnumb)) %>%
     mutate(generation = as.numeric(generation))
   #print(multisim)
   
+  # Specify the Theoretical Distribution
+  maxgen = max(multisim$generation)
+  extramaxgen = maxgen + 3 # can factor as fit
+  x = seq(0,extramaxgen,length=length(multisim$generation))
+  exponential = dexp(x, rate=transmissionrate)
+  theoretical <- cbind(x,exponential)
   
+  #Plot histogram per simulation with density and theoretical distribution curves
   p1 <- multisim %>%
     mutate(simnumb = fct_reorder(simnumb, generation)) %>%
-    ggplot( aes(x=generation, color=simnumb)) +
-    geom_histogram(aes(y=..density..),alpha=0.1, binwidth = 0.25) +
-    geom_density() +
-    scale_fill_viridis(discrete=TRUE) +
-    scale_color_viridis(discrete=TRUE) +
+    ggplot( aes(x=time)) +
+    geom_histogram(aes(x = generation, y=after_stat(density), color = simnumb),alpha=0.1, binwidth = 0.25) + 
+    geom_density(aes(x = generation, color = simnumb)) + #adjust value? ex. adjust = 1.5
+    geom_line(data=theoretical, aes(x=x,y=exponential)) +
     theme_ipsum() +
-    theme(
-      legend.position="none",
-      panel.spacing = unit(0.1, "lines"),
-      strip.text.x = element_text(size = 8)
-    ) +
+     theme(
+       legend.position="none",
+       panel.spacing = unit(0.1, "lines"),
+       strip.text.x = element_text(size = 8)
+     ) +
     xlab("Generation Interval") +
     ylab("Number of Secondary Infections") +
+    ggtitle(paste0("Exponential FGIs with Beta = ", transmissionrate, " Gamma = ", recoveryrate)) +
     facet_wrap(~simnumb)
   
-  p2 <- multisim %>%
-    ggplot( aes(x=generation, group=simnumb, fill=simnumb)) +
-    geom_density(aes(y=..density..),adjust = 0.1, alpha=0.2) + 
-    theme_ipsum() +
-    xlab("Generation Interval") +
-    ylab("Frequency of Secondary Infections")
-  
-  print(p2)
+  print(p1) # eventually make output type as part of function call
 }
 
 
