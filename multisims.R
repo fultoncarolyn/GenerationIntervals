@@ -75,26 +75,37 @@ plotsim <- function(iterations,vectortype,cohortsize,transmissionrate,recoveryra
   }
   names(multisim) <- c('generation', 'simnumb') # insert names in multisim
   multisim <- multisim[!is.na(multisim$generation),] #remove NA from no contact or other
+  multisim <- multisim[order(multisim$simnumb, multisim$generation),] #order secondary infections by group
   multisim <- multisim %>%
     gather(key="simnumb", value="generation") %>%
     mutate(simnumb = as.character(simnumb)) %>%
     mutate(generation = as.numeric(generation))
+  
+  # Add Cumulative Sum by Simulation
+  multisim$count <- ave(multisim$generation,multisim$simnumb, FUN=seq_along)
+  multisim$csum <- ave(multisim$count, multisim$simnumb, FUN=cumsum)
   #print(multisim)
   
-  # Specify the Theoretical Distribution
+  # Specify the Theoretical Distribution Characteristics
   maxgen = max(multisim$generation)
   extramaxgen = maxgen + 3 # can factor as fit
   x = seq(0,extramaxgen,length=length(multisim$generation))
-  exponential = dexp(x, rate=transmissionrate)
-  theoretical <- cbind(x,exponential)
+  # PDF
+  exppdf = transmissionrate*exp(-(transmissionrate)*x)
+  theoretical <- cbind(x,exppdf)
+  # CDF
+  expcdf = 1 - exp(-(transmissionrate)*x)
+  theoretical <- cbind(theoretical,expcdf)
+  print(theoretical)
   
-  #Plot histogram per simulation with density and theoretical distribution curves
+  
+  # Plot the histogram of each simulation with density and theoretical distribution curves
   p1 <- multisim %>%
     mutate(simnumb = fct_reorder(simnumb, generation)) %>%
-    ggplot( aes(x=time)) +
+    ggplot() +
     geom_histogram(aes(x = generation, y=after_stat(density), color = simnumb),alpha=0.1, binwidth = 0.25) + 
-    geom_density(aes(x = generation, color = simnumb)) + #adjust value? ex. adjust = 1.5
-    geom_line(data=theoretical, aes(x=x,y=exponential)) +
+    geom_density(aes(x = generation)) + #adjust value? ex. adjust = 1.5
+    geom_line(data=theoretical, aes(x=x,y=exppdf), linetype = "dashed") +
     theme_ipsum() +
      theme(
        legend.position="none",
@@ -103,10 +114,27 @@ plotsim <- function(iterations,vectortype,cohortsize,transmissionrate,recoveryra
      ) +
     xlab("Generation Interval") +
     ylab("Number of Secondary Infections") +
-    ggtitle(paste0("Exponential FGIs with Beta = ", transmissionrate, " Gamma = ", recoveryrate)) +
+    ggtitle(paste0("ExpPDF FGIs with Beta = ", transmissionrate, " Gamma = ", recoveryrate)) +
     facet_wrap(~simnumb)
   
-  print(p1) # eventually make output type as part of function call
+  #Plot the CDF of each simulation and theoretical
+  p2 <- multisim %>%
+    ggplot() +
+    geom_line(aes(x = generation, y = csum, color = "red")) +
+    geom_line(data=theoretical, aes(x=x, y=expcdf*cohortsize), linetype = "dashed") +
+    #stat_function(fun = pnorm) +
+    theme_ipsum() +
+    theme(
+      legend.position="none",
+      panel.spacing = unit(0.1, "lines"),
+      strip.text.x = element_text(size = 8)
+    ) +
+    xlab("Generation Interval") +
+    ylab("Cumulative Secondary Infections") +
+    ggtitle(paste0("ExpCDF FGIs with Beta = ", transmissionrate, " Gamma = ", recoveryrate)) +
+    facet_wrap(~simnumb)
+  
+  print(p2) # eventually make output type as part of function call
 }
 
 
