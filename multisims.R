@@ -3,6 +3,8 @@
 # GOAL: Create epidemiologically motivated figures to explore 
 #       forward generation interval simulations
 
+# GitHub stall?
+
 # Loading packages
 library(ggplot2)
 library(tidyverse)
