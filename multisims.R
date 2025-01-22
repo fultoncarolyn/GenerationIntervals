@@ -3,8 +3,6 @@
 # GOAL: Create epidemiologically motivated figures to explore 
 #       forward generation interval simulations
 
-# GitHub stall?
-
 # Loading packages
 library(ggplot2)
 library(tidyverse)
@@ -28,7 +26,7 @@ plotsim <- function(iterations,vectortype,cohortsize,transmissionrate,recoveryra
   } else {
     print("ERROR in vectortype")
   }
-  vector <- sort(vector) # put vector of initial cohort into chronological order ##necessary?##
+  vector <- sort(vector) # put vector of initial cohort into chronological order 
   
   # Create data frame this goes into
   contactdata <- data.frame(personnumber = numeric(),
@@ -84,20 +82,21 @@ plotsim <- function(iterations,vectortype,cohortsize,transmissionrate,recoveryra
   # Add Cumulative Sum by Simulation
   multisim$count <- ave(multisim$generation,multisim$simnumb, FUN=seq_along)
   multisim$csum <- ave(multisim$count, multisim$simnumb, FUN=cumsum)
-  #print(multisim)
-  
+  # Normalize the Cumulative Sum
+  multisim <- multisim %>%
+    group_by(simnumb) %>%
+    mutate(normcsum = csum/max(csum, na.rm=TRUE))
+
   # Specify the Theoretical Distribution Characteristics
   maxgen = max(multisim$generation)
   extramaxgen = maxgen + 3 # can factor as fit
   x = seq(0,extramaxgen,length=length(multisim$generation))
   # PDF
-  exppdf = transmissionrate*exp(-(transmissionrate)*x)
+  exppdf = recoveryrate*exp(-(recoveryrate)*x)
   theoretical <- cbind(x,exppdf)
   # CDF
-  expcdf = 1 - exp(-(transmissionrate)*x)
+  expcdf = 1 - exp(-(recoveryrate)*x)
   theoretical <- cbind(theoretical,expcdf)
-  print(theoretical)
-  
   
   # Plot the histogram of each simulation with density and theoretical distribution curves
   p1 <- multisim %>%
@@ -120,8 +119,8 @@ plotsim <- function(iterations,vectortype,cohortsize,transmissionrate,recoveryra
   #Plot the CDF of each simulation and theoretical
   p2 <- multisim %>%
     ggplot() +
-    geom_line(aes(x = generation, y = csum, color = "red")) +
-    geom_line(data=theoretical, aes(x=x, y=expcdf*cohortsize), linetype = "dashed") +
+    geom_line(aes(x = generation, y = normcsum, color = "red")) +
+    geom_line(data=theoretical, aes(x=x, y=expcdf), linetype = "dashed") +
     #stat_function(fun = pnorm) +
     theme_ipsum() +
     theme(
