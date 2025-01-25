@@ -1,5 +1,7 @@
 # Plotting for Multiple Forward Generation Interval Simulations
 
+# Represents base case -> Exponential Individual Infectiousness Profile
+
 # GOAL: Create epidemiologically motivated figures to explore 
 #       forward generation interval simulations
 
@@ -68,43 +70,55 @@ plotsim <- function(iterations,vectortype,cohortsize,transmissionrate,recoveryra
   }
   # Data Wrangling Stuff...
   names(contactdata) <- c('personnumber','initcohorttime', 'secondinfecttime','genint') # insert names in contactdata
-  namedintervals = cbind(contactdata$genint,paste0("sim_", k)) # append simulation group
+  gidata = sort(contactdata$genint) # extract the generation interval data and sort it
+  namedintervals = cbind(gidata,paste0("sim_", k)) # append simulation group
   multisim <- rbind(multisim,namedintervals)
   }
   names(multisim) <- c('generation', 'simnumb') # insert names in multisim
   multisim <- multisim[!is.na(multisim$generation),] #remove NA from no contact or other
-  multisim <- multisim[order(multisim$simnumb, multisim$generation),] #order secondary infections by group
   multisim <- multisim %>%
     gather(key="simnumb", value="generation") %>%
     mutate(simnumb = as.character(simnumb)) %>%
     mutate(generation = as.numeric(generation))
   
   # Add Cumulative Sum by Simulation
-  multisim$count <- ave(multisim$generation,multisim$simnumb, FUN=seq_along)
-  multisim$csum <- ave(multisim$count, multisim$simnumb, FUN=cumsum)
+  multisim$count <- ave(multisim$generation,multisim$simnumb, FUN=seq_along) # each time recieves number of infection it was by sim
   # Normalize the Cumulative Sum
   multisim <- multisim %>%
     group_by(simnumb) %>%
-    mutate(normcsum = csum/max(csum, na.rm=TRUE))
+    mutate(normcsum = count/max(count, na.rm=TRUE)) # normalize the values of indidivuals infected at every time per sim
 
-  # Specify the Theoretical Distribution Characteristics
-  maxgen = max(multisim$generation)
-  extramaxgen = maxgen + 3 # can factor as fit
-  x = seq(0,extramaxgen,length=length(multisim$generation))
-  # PDF
-  exppdf = recoveryrate*exp(-(recoveryrate)*x)
-  theoretical <- cbind(x,exppdf)
-  # CDF
-  expcdf = 1 - exp(-(recoveryrate)*x)
-  theoretical <- cbind(theoretical,expcdf)
+  # # Specify the Theoretical Distribution Characteristics
+  # maxgen = max(multisim$generation)
+  # extramaxgen = maxgen + 3 # can factor as fit
+  # x = seq(0,extramaxgen,length=length(multisim$generation))
+  # x = multisim$generation
+  # # PDF
+  # exppdf = recoveryrate*exp(-(recoveryrate)*x)
+  # theoretical <- cbind(x,exppdf)
+  # # CDF
+  # expcdf = 1 - exp(-(recoveryrate)*x)
+  # theoretical <- cbind(theoretical,expcdf)
+  
+  
+  # Create CDF and PDF using the timing of secondary infections which in this case is defined by the generation interval
+  multisim <- multisim %>%
+    group_by(simnumb) %>%
+    mutate(expncdf = 1 - exp(-(recoveryrate)*generation))
+  
+  multisim <- multisim %>%
+    group_by(simnumb) %>%
+    mutate(expnpdf = recoveryrate*exp(-(recoveryrate)*generation))
+  
+  print(multisim)
   
   # Plot the histogram of each simulation with density and theoretical distribution curves
   p1 <- multisim %>%
     mutate(simnumb = fct_reorder(simnumb, generation)) %>%
-    ggplot() +
-    geom_histogram(aes(x = generation, y=after_stat(density), color = simnumb),alpha=0.1, binwidth = 0.25) + 
-    geom_density(aes(x = generation)) + #adjust value? ex. adjust = 1.5
-    geom_line(data=theoretical, aes(x=x,y=exppdf), linetype = "dashed") +
+    ggplot(aes(x=generation)) +
+    geom_histogram(aes(y=after_stat(density), color = simnumb),alpha=0.1, binwidth = 0.25) + 
+    geom_density() + #adjust value? ex. adjust = 1.5
+    geom_line(aes(y=expnpdf), linetype = "dashed") +
     theme_ipsum() +
      theme(
        legend.position="none",
@@ -118,9 +132,9 @@ plotsim <- function(iterations,vectortype,cohortsize,transmissionrate,recoveryra
   
   #Plot the CDF of each simulation and theoretical
   p2 <- multisim %>%
-    ggplot() +
-    geom_line(aes(x = generation, y = normcsum, color = "red")) +
-    geom_line(data=theoretical, aes(x=x, y=expcdf), linetype = "dashed") +
+    ggplot(aes(x = generation)) +
+    geom_line(aes(y = normcsum, color = "red")) +
+    geom_line(aes(y=expncdf), linetype = "dashed") +
     #stat_function(fun = pnorm) +
     theme_ipsum() +
     theme(
@@ -133,7 +147,7 @@ plotsim <- function(iterations,vectortype,cohortsize,transmissionrate,recoveryra
     ggtitle(paste0("ExpCDF FGIs with Beta = ", transmissionrate, " Gamma = ", recoveryrate)) +
     facet_wrap(~simnumb)
   
-  print(p2) # eventually make output type as part of function call
+  print(p1) # eventually make output type as part of function call
 }
 
 
