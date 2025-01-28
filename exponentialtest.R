@@ -21,10 +21,10 @@ df <- data.frame(expvals = as.numeric(expvals),
 print(df)
  
  fig <-df %>%
-   ggplot(aes(x = expvals)) +
-   geom_line(aes(y = normexpvals, color = "red")) +
-   geom_line(aes(y=expcdf)) +
-   geom_line(aes(y=expcdft), linetype = "dashed") +
+   ggplot() +
+   geom_line(aes(x=expvals, y = normexpvals, color = "red")) +
+   geom_line(aes(x=expvals,y=expcdf), color = "yellow") +
+   geom_line(aes(x=timevals,y=expcdft), linetype = "dashed") +
    xlab("Time") +
    ylab("Cumulative Secondary Infections")
  
