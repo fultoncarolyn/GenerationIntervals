@@ -34,7 +34,7 @@ fixedstepwise <- function(iterations,vectortype,cohortsize,transmissionrate,reco
     # Execute the contact regime for one generation of secondary infections to be added to data frame
     for (i in 1:length(vector)){
       tau = rexp(1,recoveryrate) #exp distributed secondary infection (generation interval)
-      reproductive = (transmissionrate*tau)/recoveryrate # auc of profile
+      reproductive = (transmissionrate/recoveryrate)*(transmissionrate*tau) # auc of profile
       contacts = rpois(1,reproductive) # generate number of secondary contacts
       ##print(paste0("Number of contacts: ", contacts," for individual: ", i," from initial cohort infected at time: ", vector[i]," ."))
       # If no contacts produced...
