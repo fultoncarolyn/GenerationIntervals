@@ -112,8 +112,8 @@ deltaprofile <- function(iterations,vectortype,cohortsize,transmissionrate,recov
       strip.text.x = element_text(size = 8)
     ) +
     xlab("Generation Interval") +
-    ylab("Number of Secondary Infections") +
-    ggtitle(paste0("DeltaPDF FGIs with Beta = ", transmissionrate, " Gamma = ", recoveryrate)) +
+    ylab("Frequency of Secondary Infections") +
+    ggtitle(paste0("DeltaPDF FGIs with Beta = ", transmissionrate, " Gamma = ", recoveryrate,".")) + # "initcohort type:", vectortype, 
     facet_wrap(~simnumb)
   
   #Plot the CDF of each simulation and theoretical
@@ -129,7 +129,7 @@ deltaprofile <- function(iterations,vectortype,cohortsize,transmissionrate,recov
     ) +
     xlab("Generation Interval") +
     ylab("Cumulative Secondary Infections") +
-    ggtitle(paste0("DeltaCDF FGIs with Beta = ", transmissionrate, " Gamma = ", recoveryrate)) +
+    ggtitle(paste0("DeltaCDF FGIs with Beta = ", transmissionrate, " Gamma = ", recoveryrate, "initcohort type:", vectortype, ".")) +
     facet_wrap(~simnumb)
   
   print(p1) # eventually make output type as part of function call

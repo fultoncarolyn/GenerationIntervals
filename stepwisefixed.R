@@ -34,8 +34,7 @@ fixedstepwise <- function(iterations,vectortype,cohortsize,transmissionrate,reco
     # Execute the contact regime for one generation of secondary infections to be added to data frame
     for (i in 1:length(vector)){
       tau = rexp(1,recoveryrate) #exp distributed secondary infection (generation interval)
-      reproductive = (transmissionrate/recoveryrate)*(transmissionrate*tau) # auc of profile
-      contacts = rpois(1,reproductive) # generate number of secondary contacts
+      contacts = rpois(1,transmissionrate*tau) # generate number of secondary contacts
       ##print(paste0("Number of contacts: ", contacts," for individual: ", i," from initial cohort infected at time: ", vector[i]," ."))
       # If no contacts produced...
       if (contacts == 0){
@@ -114,8 +113,8 @@ fixedstepwise <- function(iterations,vectortype,cohortsize,transmissionrate,reco
       strip.text.x = element_text(size = 8)
     ) +
     xlab("Generation Interval") +
-    ylab("Number of Secondary Infections") +
-    ggtitle(paste0("FswPDF FGIs with Beta = ", transmissionrate, " Gamma = ", recoveryrate)) +
+    ylab("Frequency of Secondary Infections") +
+    ggtitle(paste0("FswPDF FGIs with Beta = ", transmissionrate, " Gamma = ", recoveryrate, ".")) + #"initcohort type:", vectortype, 
     facet_wrap(~simnumb)
   
   #Plot the CDF of each simulation and theoretical
@@ -131,10 +130,10 @@ fixedstepwise <- function(iterations,vectortype,cohortsize,transmissionrate,reco
     ) +
     xlab("Generation Interval") +
     ylab("Cumulative Secondary Infections") +
-    ggtitle(paste0("FswCDF FGIs with Beta = ", transmissionrate, " Gamma = ", recoveryrate)) +
+    ggtitle(paste0("FswCDF FGIs with Beta = ", transmissionrate, " Gamma = ", recoveryrate, "initcohort type:", vectortype, ".")) +
     facet_wrap(~simnumb)
   
-  print(p2) # eventually make output type as part of function call
+  print(p1) # eventually make output type as part of function call
 }
 
 
