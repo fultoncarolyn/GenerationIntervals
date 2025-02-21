@@ -71,7 +71,7 @@ plotsim <- function(iterations,vectortype,cohortsize,transmissionrate,recoveryra
   # Data Wrangling Stuff...
   names(contactdata) <- c('personnumber','initcohorttime', 'secondinfecttime','genint') # insert names in contactdata
   #contactdata <- contactdata[order(contactdata$secondinfecttime, decreasing = FALSE),] # order based on timing of secondary infection 
-  contactdata <- contactdata[order(contactdata$genint, decreasing = FALSE),] # order based on timing of generation interval length 
+  contactdata <- contactdata[order(contactdata$genint, decreasing = FALSE),] # order based on generation interval length 
   gidata = contactdata$genint # extract the generation interval data
   if (length(gidata) == 0){
     print(paste0("NOTE: Simulation number ", k," did not produce any secondary infections!"))
@@ -118,7 +118,7 @@ plotsim <- function(iterations,vectortype,cohortsize,transmissionrate,recoveryra
      ) +
     xlab("Generation Interval") +
     ylab("Number of Secondary Infections") +
-    ggtitle(paste0("ExpPDF FGIs with Beta = ", transmissionrate, " Gamma = ", recoveryrate)) +
+    ggtitle(paste0("ExpPDF FGIs with Beta = ", transmissionrate, " Gamma = ", recoveryrate, "initcohort type:", vectortype, ".")) +
     facet_wrap(~simnumb)
   
   #Plot the CDF of each simulation and theoretical
@@ -135,10 +135,10 @@ plotsim <- function(iterations,vectortype,cohortsize,transmissionrate,recoveryra
     ) +
     xlab("Generation Interval") +
     ylab("Cumulative Secondary Infections") +
-    ggtitle(paste0("ExpCDF FGIs with Beta = ", transmissionrate, " Gamma = ", recoveryrate)) +
+    ggtitle(paste0("ExpCDF FGIs with Beta = ", transmissionrate, " Gamma = ", recoveryrate, "initcohort type:", vectortype, ".")) +
     facet_wrap(~simnumb)
   
-  print(p2) # eventually make output type as part of function call
+  print(p1) # eventually make output type as part of function call
 }
 
 
